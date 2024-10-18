@@ -1,0 +1,23 @@
+MVP
+- how to do wpm calculations
+- key down/up events sent via WS
+- init 1 player lobby via WS
+- home page: start lobby, or just start game
+- upgrade to WS? react ws stuff
+- word bank on backend, plus can upload their own
+- unselectable text, each keystroke is sent via WS
+- live wpm updates on frontend?
+- accuracy score as well
+- on play, backend sends text to type -> display some amount of it
+
+Multiplayer
+- lobbies to n players
+- websocket lobby, same as 1p but logically grouped
+- send updates about other players ( progress bar )
+- on finish determine placement -> notify
+
+Logistics
+- vite/node to serve frontend
+- monolithic for now, node and go hosted on same machine on different ports
+- docker to compose both services together
+- uhh what else...
