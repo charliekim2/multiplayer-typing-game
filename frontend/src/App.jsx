@@ -1,45 +1,43 @@
 import "./App.css";
-import React, { useState, useCallback, useEffect } from "react";
-import useWebSocket, { ReadyState } from "react-use-websocket";
+import React, { useEffect, useRef } from "react";
 
 function App() {
-  //Public API that will echo messages sent to it back to the client
   const socketUrl = "ws://localhost:8080/";
-  const [messageHistory, setMessageHistory] = useState([]);
 
-  const { sendMessage, lastMessage, readyState } = useWebSocket(socketUrl);
-
+  const connection = useRef(null);
   useEffect(() => {
-    if (lastMessage !== null) {
-      setMessageHistory((prev) => prev.concat(lastMessage));
-    }
-  }, [lastMessage]);
+    const socket = new WebSocket(socketUrl);
 
-  const handleClickSendMessage = useCallback(() => sendMessage("Hello"), []);
+    socket.addEventListener("open", (event) => {
+      socket.send("Connection established");
+    });
 
-  const connectionStatus = {
-    [ReadyState.CONNECTING]: "Connecting",
-    [ReadyState.OPEN]: "Open",
-    [ReadyState.CLOSING]: "Closing",
-    [ReadyState.CLOSED]: "Closed",
-    [ReadyState.UNINSTANTIATED]: "Uninstantiated",
-  }[readyState];
+    // Listen for messages
+    socket.addEventListener("message", (event) => {
+      console.log("Message from server ", event.data);
+    });
+
+    connection.current = socket;
+
+    return () => connection.current.close();
+  }, []);
+
+  const handleKeyDown = (event) => {
+    connection.current.send(event.key);
+  };
+
+  const handleKeyUp = (event) => {
+    connection.current.send("u" + event.key);
+  };
 
   return (
     <div>
-      <button
-        onClick={handleClickSendMessage}
-        disabled={readyState !== ReadyState.OPEN}
-      >
-        Click Me to send 'Hello'
-      </button>
-      <span>The WebSocket is currently {connectionStatus}</span>
-      {lastMessage ? <span>Last message: {lastMessage.data}</span> : null}
-      <ul>
-        {messageHistory.map((message, idx) => (
-          <span key={idx}>{message ? message.data : null}</span>
-        ))}
-      </ul>
+      <input
+        type="text"
+        onPaste={(e) => e.preventDefault()}
+        onKeyDown={handleKeyDown}
+        onKeyUp={handleKeyUp}
+      />
     </div>
   );
 }
